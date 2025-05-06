@@ -1,2 +1,5 @@
-# Auto detect text files and perform LF normalization
 * text=auto
+*.smc2 binary
+*.slr binary
+*.gif binary
+*.png binary

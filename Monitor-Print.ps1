@@ -1,0 +1,1 @@
+Get-Content -Path C:\OMRON\Data\SimulatorData\CARD\Memory001\dev\print -wait -tail 0 -Encoding UTF8
