@@ -6,7 +6,7 @@
 詳細は、["NXとkintoneをつなぐ"](https://zenn.dev/kitam/articles/81f9b1482f9056)を確認してください。
 
 ユーザーはkintone REST APIを、以下のようなコードで呼び出します。
-RESOLVED、REJECTEDという単語で予想がつくと思います。
+fetch、resolved、rejectedという単語で予想がつくと思います。
 
 ```iecst
 100:
