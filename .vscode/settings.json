@@ -1,0 +1,4 @@
+{
+    "powershell.enableProfileLoading": true,
+    "powershell.scriptAnalysis.enable": true
+}

@@ -1,3 +1,16 @@
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+!*.code-workspace
+*.vsix
+
+control/PwshOpcUaClient/*
+!control/PwshOpcUaClient/*.ps1
+
+.env
+*.dev.*
 .README.md.swp
-*.stg
 *.smc2.backup

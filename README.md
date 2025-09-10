@@ -5,6 +5,13 @@
 第三者向けのプロダクトレベルの品質ではありませんが、内部的な使用は可能です。
 詳細は、["NXとkintoneをつなぐ"](https://zenn.dev/kitam/articles/81f9b1482f9056)を確認してください。
 
+ライブラリは、外部からのAPIクライアントサービス制御を目的とするOPC UAノード(制御ノード)を公開するファンクションブロック(FB)を含みます。
+FBをOPC UAサーバで公開することで、OPC UAクライアントを使用してAPIクライアントサービスを制御できます。
+制御ノードは、APIクライアントサービスの有効/無効化とアプリケーション設定機能を有しています。
+これらにより、プロジェクト及びコントローラにkintoneに関連するシークレット情報を保持しない構成や、運転中のホットリロードが可能になります。
+制御ノード操作は、コントローラとOPC UAサーバのアクセスコントロールにより保護されます。
+OPC UAによる外部制御は、`control/`ディレクトリを確認してください。
+
 ユーザーはkintone REST APIを、以下のようなコードで呼び出します。
 fetch、resolved、rejectedという単語で予想がつくと思います。
 
@@ -77,9 +84,29 @@ POUにシークレット情報を配置するのであれば、別途パスワ�
 CASE iState OF
     // STATE_INIT
     0:
-        // 設定初期化
-        InitKintoneRestApiClientServiceSettings(
+        // 単独動作モード: TRUE=OPC UAによる制御を行わない, FALSE=行う
+        IsStandaloneMode := FALSE;
+    
+        // サービスを構成
+        ConfigureKintoneRestApiClientService(
             LockKey:=17);
+        iService.Enable := TRUE;
+        
+        IF IsStandaloneMode THEN
+            iState := STATE_SETTING;
+        ELSE
+            iState := STATE_ACTIVE;
+        END_IF;
+
+    // STATE_SETTING
+    5:
+        // サービス構成
+        ConfigureKintoneRestApiClientService(
+            // 排他制御キー。
+            LockKey:=17);
+        
+        // 設定初期化
+        InitKintoneRestApiClientServiceSettings();
         
         // Kintoneアプリの登録
         // トラブル収集アプリの登録
@@ -88,7 +115,7 @@ CASE iState OF
             Subdomain:='YOUR_KINTONE_SUBDOMAIN',
             AppId:='YOUR_APP_ID',
             ApiToken:='YOUR_APP_API_TOKEN');
-            
+                
         // 無制約TLSセッションの登録
         RegisterUnrestrictedTlsSession(
             TlsSessionName:='TLSSession0');
@@ -96,7 +123,7 @@ CASE iState OF
             TlsSessionName:='TLSSession1');
 
         Inc(iState);
-    1:
+    6:
         IF iCtrlReload THEN
             ReloadKintoneRestApiClientService();
             iCtrlReload := FALSE;
@@ -117,7 +144,12 @@ CASE iState OF
             DisableKintoneRestApiClientService();
             iCtrlDisable := FALSE;
         ELSIF iCtrlReload THEN
-            iState := STATE_INIT;
+            IF IsStandaloneMode THEN
+                iState := STATE_SETTING;
+            ELSE
+                ReloadKintoneRestApiClientService();
+                iCtrlReload := FALSE;
+            END_IF;
         END_IF;
 END_CASE;
 
@@ -145,7 +177,7 @@ APIクライアントサービスは、以下のkintone REST APIに対応して�
 # 使用環境
 このプロジェクトの使用には、以下の環境が必要です。
 
-|||
+|Item|Requirement|
 |-|-|
 |コントローラ|NX1またはNX5|
 |Sysmac Studio|最新版を推奨。|
@@ -164,10 +196,10 @@ The following environment is required to use this project
 # 構築した環境
 このプロジェクトは、以下の環境で構築しました。
 
-|||
+|Item|Version|
 |-|-|
 |コントローラ|NX102-9000 Ver 1.64|
-|Sysmac Studio|Ver.1.62|
+|Sysmac Studio|Ver.1.63|
 <!--
 # Built environment
 This project was built in the following environment.
@@ -222,9 +254,19 @@ https://{サブドメイン}.cybozu.com/k/admin/app/apitoken?app={アプリID}
 
 ### 4. サンプルプロジェクトのAPIクライアントサービスの設定を変更
 **POU/プログラム/KintoneRestApiClientServiceRunner**を編集します。
-各RegisterKintoneAppの引数を作成したkintoneアプリに合わせます。
+まず、動作モードを指定します。
+`IsStandaloneMode`を**FALSE**にしてOPC UAによる外部制御を行わないようにします。
+
+```iecst
+// 単独動作モード: TRUE=OPC UAによる制御を行わない, FALSE=行う
+IsStandaloneMode := FALSE;
+```
+
+サンプルプロジェクトは、OPC UAサーバが動作しますが、OPC UAサーバのセットアップをしない限り制御ノード操作のアクセスが許可されることはありません。
+
+次に、各RegisterKintoneAppの引数を作成したkintoneアプリに合わせます。
 kintoneのサブドメイン、アプリID、APIトークンを変更します。
-***YOUR_KINTONE_SUBDOMAIN***をログイン時に求められるサブドメインで、***YOUR_APP_ID*** を2で控えたアプリID、 ***YOUR_APP_API_TOKEN*** をAPIトークンで置き換えます。
+`YOUR_KINTONE_SUBDOMAIN`をログイン時に求められるサブドメインで、`YOUR_APP_ID`を2で控えたアプリID、`YOUR_APP_API_TOKEN`をAPIトークンで置き換えます。
 
 ```iecst
 // トラブル収集アプリの登録

@@ -1,0 +1,29 @@
+{
+    "Applications": [
+        {
+            "Name": "TroubleCollection",
+            "Subdomain": "YOUR_SUBDOMAIN",
+            "AppId": "YOUR_APP_ID",
+            "ApiToken": "YOUR_API_TOKEN",
+            "TlsSessionName": ""
+        },
+        {
+            "Name": "ProductionMonitor",
+            "Subdomain": "YOUR_SUBDOMAIN",
+            "AppId": "YOUR_APP_ID",
+            "ApiToken": "YOUR_API_TOKEN",
+            "TlsSessionName": ""
+        },
+        {
+            "Name": "ProductionTask",
+            "Subdomain": "YOUR_SUBDOMAIN",
+            "AppId": "YOUR_APP_ID",
+            "ApiToken": "YOUR_API_TOKEN",
+            "TlsSessionName": ""
+        }
+    ],
+    "TlsSessionNames": [
+        "TLSSession0",
+        "TLSSession1"
+    ]
+}
